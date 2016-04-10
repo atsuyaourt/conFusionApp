@@ -218,10 +218,20 @@ angular.module('conFusion.controllers', [])
     }
   ])
 
-.controller('AboutController', ['$scope', 'corporateFactory', function ($scope, corporateFactory) {
+.controller('AboutController', ['$scope', 'corporateFactory', 'baseURL', function ($scope, corporateFactory, baseURL) {     
+      
+      $scope.baseURL = baseURL;
 
-      $scope.leaders = corporateFactory.query();
-      console.log($scope.leaders);
+      $scope.message = "Loading ...";
+
+      corporateFactory.query(
+        function (response) {
+        $scope.leaders = response;
+        console.log($scope.leaders);
+      },
+        function (response) {
+        $scope.message = "Error: " + response.status + " " + response.statusText;
+      });
 
     }
   ]);

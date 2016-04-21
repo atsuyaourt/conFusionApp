@@ -69,10 +69,11 @@ angular.module('conFusion.controllers', [])
       $scope.closeReserve();
     }, 1000);
   }; 
- 
+  
 })
 
-.controller('MenuController', ['$scope', 'menuFactory', 'favoriteFactory', 'baseURL', '$ionicListDelegate', function ($scope, menuFactory, favoriteFactory, baseURL, $ionicListDelegate) {
+.controller('MenuController', ['$scope', 'menuFactory', 'favoriteFactory', 'baseURL', 
+'$ionicListDelegate', function ($scope, menuFactory, favoriteFactory, baseURL, $ionicListDelegate) {
 
       $scope.baseURL = baseURL;
 
@@ -118,6 +119,7 @@ angular.module('conFusion.controllers', [])
         favoriteFactory.addToFavorites(index);
         $ionicListDelegate.closeOptionButtons();
       };
+
     }
   ])
 
@@ -173,7 +175,9 @@ angular.module('conFusion.controllers', [])
     }
   ])
 
-.controller('DishDetailController', ['$scope', '$stateParams', 'menuFactory', 'baseURL', function ($scope, $stateParams, menuFactory, baseURL) {
+.controller('DishDetailController', ['$scope', '$stateParams', 'menuFactory', 'favoriteFactory', 
+'baseURL', '$ionicPopover', '$ionicModal',
+function ($scope, $stateParams, menuFactory, favoriteFactory, baseURL, $ionicPopover, $ionicModal) {
 
       $scope.baseURL = baseURL;
 
@@ -191,39 +195,76 @@ angular.module('conFusion.controllers', [])
         },
           function (response) {
           $scope.message = "Error: " + response.status + " " + response.statusText;
-        });
+      });
+      
+      $scope.addFavorite = function (index) {
+        console.log("index is " + index);
+        favoriteFactory.addToFavorites(index);
+        $scope.closePopover();
+      };
+      
+      $ionicPopover.fromTemplateUrl('templates/dish-detail-popover.html', {
+        scope: $scope
+      }).then(function(popover) {
+        $scope.popover = popover;
+      });
 
-    }
-  ])
-
-.controller('DishCommentController', ['$scope', 'menuFactory', function ($scope, menuFactory) {
-
-      $scope.mycomment = {
-        rating : 5,
-        comment : "",
-        author : "",
-        date : ""
+      $scope.openPopover = function($event) {
+        $scope.popover.show($event);
       };
 
-      $scope.submitComment = function () {
+      $scope.closePopover = function() {
+        $scope.popover.hide();
+      };
+      
+      // Perform Action on destroy
+      $scope.$on('$destroy', function() {
+        $scope.popover.remove();
+      });
+      // Perform action on hide popover
+      $scope.$on('popover.hidden', function() {
+      // Perform action
+      });
+      // Perform action on remove popover
+      $scope.$on('popover.removed', function() {
+      // Perform action
+      });
+      
+      $scope.mycomment = {};
+      
+      // Create the add comment modal that we will use later
+      $ionicModal.fromTemplateUrl('templates/dish-comment.html', {
+        scope: $scope
+      }).then(function(modal) {
+        $scope.addcommentform = modal;
+      });
 
-        $scope.mycomment.date = new Date().toISOString();
-        console.log($scope.mycomment);
+      // Triggered in the add comment modal to close it
+      $scope.closeAddComment = function() {
+        $scope.addcommentform.hide();
+        $scope.closePopover();
+      };
+
+      // Open the add comment modal
+      $scope.addComment = function() {
+        $scope.addcommentform.show();
+      };
+      
+      $scope.doAddComment = function() {
+        console.log('Adding Comment', $scope.mycomment);
+        
+          $scope.mycomment.date = new Date().toISOString();
 
         $scope.dish.comments.push($scope.mycomment);
         menuFactory.getDishes().update({
           id : $scope.dish.id
         }, $scope.dish);
 
-        $scope.commentForm.$setPristine();
+        $scope.mycomment = {};
+        
+        $scope.closeAddComment();
+      }; 
 
-        $scope.mycomment = {
-          rating : 5,
-          comment : "",
-          author : "",
-          date : ""
-        };
-      }
     }
   ])
 
@@ -341,4 +382,8 @@ angular.module('conFusion.controllers', [])
     }
     return out;
   }
-});
+})
+
+
+
+;

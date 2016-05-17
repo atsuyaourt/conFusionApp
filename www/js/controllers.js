@@ -120,9 +120,7 @@ angular.module('conFusion.controllers', [])
       });
       $scope.registerform.show();
     };
-  });
-  
-  $scope.pickImage = function() {
+    
     var options = {
       maximumImagesCount: 1,
       width: 100,
@@ -130,12 +128,16 @@ angular.module('conFusion.controllers', [])
       quality: 80
     };
     
-    $cordovaImagePicker.getPictures(options).then(function (results) {
-      $scope.registration.imgSrc = results[0];
-    }, function(err) {
-      console.log(err);
-    });
-  };
+    $scope.pickImage = function() {
+      $cordovaImagePicker.getPictures(options).then(function (results) {
+        $scope.registration.imgSrc = results[0];
+      }, function(err) {
+        console.log(err);
+      });
+    };
+  });
+  
+  
 
 })
 
